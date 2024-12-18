@@ -1,0 +1,144 @@
+{
+"networks": {
+    "mainnet": {
+    "chain_id": 1,
+    "name": "ethereum",
+    "rpc_url": "YOUR_ETHEREUM_RPC_URL",
+    "ws_url": "YOUR_ETHEREUM_WSS_URL",
+    "block_confirmation": 1
+    },
+    "goerli": {
+    "chain_id": 5,
+    "name": "goerli",
+    "rpc_url": "YOUR_GOERLI_RPC_URL",
+    "ws_url": "YOUR_GOERLI_WSS_URL",
+    "block_confirmation": 1
+    }
+},
+"contracts": {
+    "dex": {
+    "uniswap_v2_router": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    "uniswap_v2_factory": "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+    "uniswap_v3_router": "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+    "uniswap_v3_factory": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+    "sushiswap_router": "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
+    "sushiswap_factory": "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"
+    },
+    "flash_loan": {
+    "aave_pool": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+    "aave_pool_provider": "0xa97684ead0e402dC232d5A977953DF7ECBaA035b"
+    },
+    "tokens": {
+    "weth": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "usdc": "0xA0b86991c6218b36f7cb962916D12248c2245ed3",
+    "usdt": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "dai": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "wbtc": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+    }
+},
+"gas": {
+    "max_gas_price": 50,
+    "gas_limit": 500000,
+    "priority_fee": 1.5,
+    "base_fee_multiplier": 1.2,
+    "max_priority_fee": 3.0
+},
+"trading": {
+    "min_profit_usd": 100,
+    "price_update_interval": 1.0,
+    "max_slippage": 0.005,
+    "min_liquidity_usd": 50000,
+    "max_trade_size_usd": 100000,
+    "min_trade_size_usd": 1000,
+    "max_pairs_per_token": 5
+},
+"arbitrage_pairs": {
+    "pairs": [
+        {
+            "name": "WETH-USDC",
+            "tokens": [
+                "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "0xA0b86991c6218b36f7cb962916D12248c2245ed3"
+            ],
+            "dexes": ["uniswap_v2", "sushiswap"],
+            "active": true
+        },
+        {
+            "name": "WETH-DAI",
+            "tokens": [
+                "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+            ],
+            "dexes": ["uniswap_v2", "sushiswap"],
+            "active": true
+        },
+        {
+            "name": "USDC-DAI",
+            "tokens": [
+                "0xA0b86991c6218b36f7cb962916D12248c2245ed3",
+                "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+            ],
+            "dexes": ["uniswap_v2", "sushiswap", "uniswap_v3"],
+            "active": true
+        },
+        {
+            "name": "WBTC-WETH",
+            "tokens": [
+                "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+                "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+            ],
+            "dexes": ["uniswap_v2", "sushiswap"],
+            "active": true
+        }
+    ]
+},
+"flash_loan": {
+    "protocol": "aave",
+    "max_loan_ratio": 0.75,
+    "safety_margin": 0.02,
+    "min_loan_amount": 1000,
+    "max_loan_amount": 100000,
+    "fallback_protocol": "balancer",
+    "retry_interval": 1.0,
+    "max_retries": 3
+},
+"monitoring": {
+    "price_deviation_threshold": 0.02,
+    "gas_price_update_interval": 15,
+    "health_check_interval": 60,
+    "max_pending_transactions": 2
+},
+"execution": {
+    "max_retries": 3,
+    "retry_delay": 1.0,
+    "timeout": 30,
+    "confirmation_blocks": 1,
+    "max_concurrent_trades": 2
+},
+"logging": {
+    "level": "INFO",
+    "file_path": "logs/arbitrage_bot.log",
+    "max_file_size_mb": 100,
+    "backup_count": 5,
+    "console_output": true
+},
+"notifications": {
+    "enabled": true,
+    "telegram": {
+        "enabled": false,
+        "bot_token": "YOUR_BOT_TOKEN",
+        "chat_id": "YOUR_CHAT_ID"
+    },
+    "discord": {
+        "enabled": false,
+        "webhook_url": "YOUR_WEBHOOK_URL"
+    },
+    "email": {
+        "enabled": false,
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "sender_email": "your-email@example.com",
+        "recipient_email": "recipient@example.com"
+    }
+}
+}
