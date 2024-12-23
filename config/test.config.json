@@ -1,0 +1,111 @@
+{
+  "network": {
+    "http_endpoint": "http://geth:8545",
+    "ws_endpoint": "ws://geth:8546",
+    "chain_id": 1,
+    "gas_price_strategy": "fast",
+    "max_gas_price": 100000000000,
+    "confirmations": 1,
+    "block_time": 12,
+    "max_pending_transactions": 1000
+  },
+  "monitoring": {
+    "prometheus": {
+      "port": 9090,
+      "metrics_path": "/metrics",
+      "scrape_interval": "5s",
+      "evaluation_interval": "5s"
+    },
+    "grafana": {
+      "port": 3000,
+      "admin_user": "admin",
+      "admin_password": "admin",
+      "dashboards_path": "/var/lib/grafana/dashboards"
+    },
+    "alerts": {
+      "latency_threshold_ms": 100,
+      "error_rate_threshold": 0.01,
+      "profit_threshold_eth": 0.1,
+      "gas_price_threshold_gwei": 100,
+      "block_delay_threshold_s": 60
+    }
+  },
+  "optimization": {
+    "latency": {
+      "target_ms": 50,
+      "max_acceptable_ms": 100,
+      "measurement_interval": "5s",
+      "sample_size": 1000,
+      "warmup_blocks": 5
+    },
+    "mempool": {
+      "max_pending_tx": 1000,
+      "min_profit_threshold": "0.01 ETH",
+      "max_block_delay": 2,
+      "max_gas_price_gwei": 100
+    },
+    "network": {
+      "min_peers": 5,
+      "max_block_age": 5,
+      "retry_interval": "1s",
+      "max_retries": 3,
+      "connection_timeout": "5s"
+    },
+    "execution": {
+      "max_slippage": 0.005,
+      "min_liquidity": "10 ETH",
+      "max_path_length": 3,
+      "min_profit_margin": 0.002
+    }
+  },
+  "performance": {
+    "cache": {
+        "enabled": true,
+        "max_age_seconds": 60,
+        "max_size_mb": 100
+    },
+    "websocket": {
+        "enabled": true,
+        "max_reconnect_attempts": 5,
+        "reconnect_interval_ms": 1000
+    },
+    "batch_size": 100,
+    "concurrent_tasks": 10,
+    "mempool_scan_interval_ms": 100
+  },
+  "redis": {
+    "host": "redis",
+    "port": 6379,
+    "db": 0,
+    "key_prefix": "test:",
+    "ttl": 3600
+  },
+  "testing": {
+    "transaction_count": 100,
+    "monitoring_duration": 300,
+    "gas_limit": 500000,
+    "test_account": {
+      "balance_eth": 100,
+      "private_key": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    },
+    "pairs": [
+      {
+        "token0": "WETH",
+        "token1": "USDC",
+        "dex": "uniswap_v2"
+      },
+      {
+        "token0": "WETH",
+        "token1": "DAI",
+        "dex": "sushiswap"
+      }
+    ]
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "logs/arbitrage.log",
+    "max_size": 10485760,
+    "backup_count": 5
+  }
+}

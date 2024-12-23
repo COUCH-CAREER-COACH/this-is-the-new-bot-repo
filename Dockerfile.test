@@ -1,0 +1,79 @@
+# Use Python 3.11 slim image
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    wget \
+    git \
+    netcat-traditional \
+    redis-tools \
+    python3-dev \
+    python3-pip \
+    python3-setuptools \
+    python3-wheel \
+    pkg-config \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Ensure Python is installed and set npm to use it
+RUN apt-get install -y python3
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y curl && \
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+WORKDIR /app
+
+# Create node user and group
+RUN groupadd -g 1000 node
+RUN useradd -u 1000 -g node -s /bin/bash node
+
+# Copy package files first for better caching
+COPY package*.json ./
+
+# Install Node.js dependencies
+ENV NODE_ENV=production
+RUN npm ci --production --no-optional --legacy-peer-deps \
+    && npm cache clean --force
+
+# Fix potential permissions issue with node-gyp cache
+RUN mkdir -p /root/.npm
+RUN chown -R node:node /root/.npm
+
+# Install Python dependencies
+COPY requirements.txt test-requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create directories and set permissions
+RUN mkdir -p logs reports metrics tmp data/ganache \
+    && chmod -R 777 logs reports metrics tmp
+
+# Set environment variables
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PROMETHEUS_MULTIPROC_DIR=/app/tmp \
+    PATH="/usr/local/bin:${PATH}"
+
+# Copy project files
+COPY . .
+
+# Install FastAPI
+RUN pip install "uvicorn[standard]" fastapi psutil
+
+# Make scripts executable and copy the startup script
+RUN chmod +x scripts/*.sh scripts/*.py \
+    && cp scripts/start.sh /app/start.sh \
+    && chmod +x /app/start.sh
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Verify script exists and is executable
+RUN ls -l /app/start.sh
+
+# Default command
+CMD ["/app/start.sh"]

@@ -1,0 +1,42 @@
+# Use the official Geth image
+FROM ethereum/client-go:latest
+
+# Install required tools
+RUN apk add --no-cache \
+    curl \
+    wget \
+    jq
+
+# Create directory for chain data
+RUN mkdir -p /root/.ethereum
+
+# Copy configuration
+COPY config/geth.toml /root/geth.toml
+
+# Expose ports
+EXPOSE 8545 8546 6060 30303 30303/udp
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -sf http://localhost:8545 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":67}' || exit 1
+
+# Set default command
+ENTRYPOINT ["geth"]
+
+# Default arguments (can be overridden)
+CMD ["--config", "/root/geth.toml", \
+     "--http", \
+     "--http.api", "eth,net,web3,debug,txpool", \
+     "--http.addr", "0.0.0.0", \
+     "--http.corsdomain", "*", \
+     "--ws", \
+     "--ws.api", "eth,net,web3,debug,txpool", \
+     "--ws.addr", "0.0.0.0", \
+     "--ws.origins", "*", \
+     "--metrics", \
+     "--metrics.addr", "0.0.0.0", \
+     "--syncmode", "snap", \
+     "--txlookuplimit", "0", \
+     "--cache", "4096", \
+     "--maxpeers", "50", \
+     "--nat", "any"]

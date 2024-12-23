@@ -1,0 +1,26 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install minimal system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    netcat-traditional && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy and install requirements
+COPY requirements.txt test-requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r test-requirements.txt
+
+# Copy only necessary files
+COPY src/ src/
+COPY test/ test/
+COPY config/ config/
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Default command
+CMD ["python", "-m", "pytest", "test/test_latency_optimization.py", "-v"]

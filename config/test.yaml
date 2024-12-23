@@ -1,0 +1,67 @@
+# Test YAML configuration
+monitoring:
+  prometheus:
+    port: 9090
+    retention_days: 15
+    scrape_interval: 15s
+    evaluation_interval: 15s
+    targets:
+      - name: arbitrage-bot
+        endpoint: mev-bot:8080
+        path: /metrics
+      - name: node-exporter
+        endpoint: node-exporter:9100
+        path: /metrics
+
+  grafana:
+    port: 3000
+    admin_user: admin
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus:9090
+        default: true
+      - name: Loki
+        type: loki
+        url: http://loki:3100
+
+alerts:
+  groups:
+    - name: performance
+      rules:
+        - alert: HighGasPrice
+          expr: eth_gas_price > 100000000000
+          for: 2m
+          labels:
+            severity: warning
+        - alert: LowProfitability
+          expr: arbitrage_profit_eth < 0.001
+          for: 15m
+          labels:
+            severity: warning
+
+testing:
+  scenarios:
+    - name: normal_conditions
+      gas_price: 50
+      block_time: 12
+      network_latency: 100
+    - name: high_congestion
+      gas_price: 200
+      block_time: 15
+      network_latency: 500
+    - name: extreme_conditions
+      gas_price: 500
+      block_time: 20
+      network_latency: 1000
+
+  thresholds:
+    max_execution_time: 1000
+    max_memory_usage: 512
+    max_failed_attempts: 3
+
+  coverage:
+    min_percentage: 90
+    exclude_patterns:
+      - test/*
+      - scripts/*

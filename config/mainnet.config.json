@@ -1,0 +1,126 @@
+{
+    "network": {
+        "chain_id": 1,
+        "rpc_url": "http://geth:8545",
+        "ws_url": "ws://geth:8546",
+        "block_confirmations": 2,
+        "gas_price_strategy": "fast",
+        "max_gas_price": "300000000000"
+    },
+    "dex": {
+        "uniswap_v2_router": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+        "uniswap_v2_factory": "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+        "sushiswap_router": "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F",
+        "sushiswap_factory": "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"
+    },
+    "flash_loan": {
+        "preferred_provider": "aave",
+        "providers": {
+            "aave": {
+                "pool_address_provider": "0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5",
+                "fee": "0.0009"
+            }
+        }
+    },
+    "contracts": {
+        "arbitrage_contract": "0x1234567890123456789012345678901234567890",
+        "weth": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "dai": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "usdt": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    "strategies": {
+        "sandwich": {
+            "enabled": true,
+            "min_profit_wei": "50000000000000000",
+            "max_position_size": "50000000000000000000",
+            "max_price_impact": "0.03",
+            "min_liquidity": "100000000000000000000",
+            "max_gas_price": "300000000000",
+            "target_pairs": [
+                {
+                    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                    "token1": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+                    "min_amount": "1000000000000000000",
+                    "max_amount": "100000000000000000000"
+                },
+                {
+                    "token0": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                    "token1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                    "min_amount": "1000000000000000000",
+                    "max_amount": "100000000000000000000"
+                }
+            ]
+        },
+        "frontrun": {
+            "enabled": true,
+            "min_profit_wei": "50000000000000000",
+            "max_position_size": "50000000000000000000",
+            "max_price_impact": "0.03",
+            "min_liquidity": "100000000000000000000",
+            "max_gas_price": "300000000000"
+        },
+        "jit": {
+            "enabled": true,
+            "min_profit_wei": "50000000000000000",
+            "max_position_size": "50000000000000000000",
+            "max_price_impact": "0.03",
+            "min_liquidity": "100000000000000000000",
+            "max_gas_price": "300000000000",
+            "liquidity_hold_blocks": 2
+        }
+    },
+    "monitoring": {
+        "prometheus": {
+            "enabled": true,
+            "port": 9090
+        },
+        "grafana": {
+            "enabled": true,
+            "port": 3000
+        },
+        "alerts": {
+            "enabled": true,
+            "telegram": {
+                "bot_token": "YOUR_BOT_TOKEN",
+                "chat_id": "YOUR_CHAT_ID"
+            },
+            "thresholds": {
+                "gas_price_gwei": 300,
+                "min_eth_balance": "1000000000000000000",
+                "max_failed_txs": 3,
+                "max_response_time_ms": 1000
+            }
+        }
+    },
+    "security": {
+        "max_slippage": "0.005",
+        "max_gas_multiplier": "1.5",
+        "min_eth_reserve": "1000000000000000000",
+        "emergency_withdrawal": {
+            "enabled": true,
+            "threshold_eth": "0.5",
+            "safe_address": "YOUR_SAFE_ADDRESS"
+        },
+        "circuit_breaker": {
+            "enabled": true,
+            "max_loss_eth": "0.1",
+            "cooldown_blocks": 100
+        }
+    },
+    "performance": {
+        "cache": {
+            "enabled": true,
+            "max_age_seconds": 60,
+            "max_size_mb": 100
+        },
+        "websocket": {
+            "enabled": true,
+            "max_reconnect_attempts": 5,
+            "reconnect_interval_ms": 1000
+        },
+        "batch_size": 100,
+        "concurrent_tasks": 10,
+        "mempool_scan_interval_ms": 100
+    }
+}

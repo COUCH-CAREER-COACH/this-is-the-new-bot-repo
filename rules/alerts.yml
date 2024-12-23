@@ -1,0 +1,100 @@
+groups:
+  - name: arbitrage_alerts
+    rules:
+      - alert: HighLatency
+        expr: rate(arbitrage_bot_transaction_latency_milliseconds_sum[5m]) / rate(arbitrage_bot_transaction_latency_milliseconds_count[5m]) > 100
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: High transaction latency
+          description: Average transaction latency is {{ $value | printf "%.2f" }}ms over 5m
+
+      - alert: CriticalLatency
+        expr: rate(arbitrage_bot_transaction_latency_milliseconds_sum[5m]) / rate(arbitrage_bot_transaction_latency_milliseconds_count[5m]) > 200
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: Critical transaction latency
+          description: Average transaction latency is {{ $value | printf "%.2f" }}ms over 5m
+
+      - alert: HighErrorRate
+        expr: rate(arbitrage_bot_errors_total[5m]) / rate(arbitrage_bot_transactions_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High error rate
+          description: Error rate is {{ $value | humanizePercentage }} over 5m
+
+      - alert: LowProfitability
+        expr: rate(arbitrage_bot_profit_eth[1h]) < 0.1
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: Low profitability
+          description: Profit rate is {{ $value }} ETH/hour over last hour
+
+      - alert: HighGasPrice
+        expr: ethereum_gas_price > 100000000000
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: High gas price
+          description: Gas price is {{ $value | humanize1024 }} gwei for 15m
+
+      - alert: LowPeerCount
+        expr: ethereum_peer_count < 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Low peer count
+          description: Only {{ $value }} peers connected
+
+      - alert: BlockDelay
+        expr: time() - ethereum_latest_block_timestamp > 60
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Block delay detected
+          description: No new blocks for {{ $value | humanizeDuration }}
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage
+          description: Memory usage is {{ $value | humanize1024 }}MB
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage
+          description: CPU usage is {{ $value | printf "%.2f" }}%
+
+  - name: recording_rules
+    rules:
+      - record: arbitrage:latency:avg_5m
+        expr: rate(arbitrage_bot_transaction_latency_milliseconds_sum[5m]) / rate(arbitrage_bot_transaction_latency_milliseconds_count[5m])
+      
+      - record: arbitrage:success_rate:5m
+        expr: rate(arbitrage_bot_transactions_total{status="success"}[5m]) / rate(arbitrage_bot_transactions_total[5m])
+      
+      - record: arbitrage:profit:hourly
+        expr: rate(arbitrage_bot_profit_eth[1h]) * 3600
+      
+      - record: arbitrage:gas_usage:avg_5m
+        expr: rate(arbitrage_bot_gas_used_total[5m]) / rate(arbitrage_bot_transactions_total[5m])
+      
+      - record: arbitrage:mempool_pending:5m
+        expr: avg_over_time(ethereum_txpool_pending[5m])

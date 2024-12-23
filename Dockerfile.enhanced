@@ -1,0 +1,81 @@
+# Use Python 3.9 slim as base
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies and cleanup in one layer
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    libuv1-dev \
+    pkg-config \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for performance
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONOPTIMIZE=2
+ENV PYTHONFAULTHANDLER=1
+ENV PYTHONHASHSEED=random
+ENV PYTHONASYNCIODEBUG=0
+
+# Install pip dependencies in order of complexity
+# Layer 1: Basic utilities and tools
+RUN pip install --no-cache-dir \
+    setuptools \
+    wheel \
+    pip==23.0.1
+
+# Layer 2: Core dependencies
+RUN pip install --no-cache-dir "web3==5.31.0" \
+    "eth-abi>=2.0.0b6,<3.0.0" \
+    "eth-account>=0.5.9,<0.6.0" \
+    "eth-typing>=2.2.0,<3.0.0" \
+    "eth-utils>=1.9.5,<2.0.0" \
+    "hexbytes>=0.2.0,<1.0.0"
+
+# Layer 3: Async and performance dependencies
+RUN pip install --no-cache-dir \
+    "uvloop==0.17.0" \
+    "ujson==5.7.0" \
+    "aiohttp==3.8.5" \
+    "aiodns==3.0.0" \
+    "asyncio==3.4.3"
+
+# Layer 4: Testing dependencies
+RUN pip install --no-cache-dir \
+    "pytest>=7.0.0,<8.0.0" \
+    "pytest-asyncio==0.21.1" \
+    "pytest-xdist==1.34.0" \
+    "pytest-cov==4.1.0"
+
+# Layer 5: Monitoring and utilities
+RUN pip install --no-cache-dir \
+    "prometheus_client==0.17.1" \
+    "psutil==5.9.5" \
+    "statsd==4.0.1" \
+    "python-dotenv==1.0.0" \
+    "tenacity==8.2.2" \
+    "cachetools==5.3.1"
+
+# Layer 6: Additional dependencies
+RUN pip install --no-cache-dir \
+    "requests==2.31.0" \
+    "websockets==9.1" \
+    "parsimonious==0.9.0" \
+    "protobuf==3.19.5" \
+    "jsonschema==4.0.0"
+
+# Layer 7: Install eth-brownie separately to avoid conflicts
+RUN pip install --no-cache-dir "eth-brownie==1.19.3"
+
+# Copy source code
+COPY . .
+
+# Make scripts executable
+RUN chmod +x run_enhanced_bot.py
+
+# Use custom event loop policy for better performance
+CMD ["python", "-c", "import asyncio, uvloop; asyncio.set_event_loop_policy(uvloop.EventLoopPolicy()); import run_enhanced_bot; asyncio.run(run_enhanced_bot.main())"]

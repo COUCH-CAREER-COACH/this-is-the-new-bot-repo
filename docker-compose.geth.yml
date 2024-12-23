@@ -1,0 +1,93 @@
+version: '3.8'
+services:
+  geth:
+    image: ethereum/client-go:latest
+    ports:
+      - "8545:8545"  # RPC
+      - "8546:8546"  # WebSocket
+      - "30303:30303"  # P2P
+      - "6060:6060"  # Metrics
+    volumes:
+      - ./geth-data:/root/.ethereum
+    command:
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port=8545
+      - --http.api=eth,net,web3,txpool,debug,admin
+      - --http.corsdomain=*
+      - --http.vhosts=*
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port=8546
+      - --ws.api=eth,net,web3,txpool,debug,admin
+      - --ws.origins=*
+      - --syncmode=snap
+      - --txlookuplimit=0
+      - --cache=8192
+      - --cache.gc=0.8
+      - --metrics
+      - --metrics.addr=0.0.0.0
+      - --metrics.port=6060
+      - --pprof
+      - --pprof.addr=0.0.0.0
+      - --pprof.port=6061
+      - --maxpeers=100
+      - --txpool.globalslots=20000
+      - --txpool.globalqueue=10000
+      - --txpool.pricelimit=1
+      - --txpool.pricebump=10
+      - --gcmode=archive
+      - --state.gc-interval=100000
+      - --rpc.allow-unprotected-txs
+      - --rpc.gascap=0
+      - --rpc.txfeecap=0
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "10"
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus-geth.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=your_secure_password_here
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:

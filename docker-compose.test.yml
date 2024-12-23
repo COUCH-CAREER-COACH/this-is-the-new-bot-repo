@@ -1,0 +1,144 @@
+services:
+  geth:
+    build:
+      context: .
+      dockerfile: Dockerfile.geth
+    ports:
+      - "8545:8545"  # HTTP RPC
+      - "8546:8546"  # WS RPC
+      - "6060:6060"  # Metrics
+    volumes:
+      - ./geth-data:/root/.ethereum
+      - ./config/geth.toml:/root/geth.toml
+    command: >
+      --http 
+      --http.api eth,net,web3,debug,txpool 
+      --http.addr 0.0.0.0 
+      --http.corsdomain "*" 
+      --ws 
+      --ws.api eth,net,web3,debug,txpool 
+      --ws.addr 0.0.0.0 
+      --ws.origins "*" 
+      --metrics 
+      --metrics.addr 0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - arbitrage-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - arbitrage-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus-test.yml:/etc/prometheus/prometheus.yml
+      - ./rules:/etc/prometheus/rules
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=24h'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - arbitrage-net
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-clock-panel,grafana-simple-json-datasource
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - arbitrage-net
+    depends_on:
+      prometheus:
+        condition: service_healthy
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+      - ./metrics:/app/metrics
+      - ./reports:/app/reports
+    environment:
+      - WEB3_PROVIDER_URI=http://geth:8545
+      - WS_PROVIDER_URI=ws://geth:8546
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PROMETHEUS_PORT=9090
+      - GRAFANA_PORT=3000
+      - CONFIG_PATH=/app/config/test.config.json
+      - PYTHONPATH=/app
+      - NODE_ENV=production
+    networks:
+      - arbitrage-net
+    depends_on:
+      geth:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    command: ["/app/start.sh"]
+
+networks:
+  arbitrage-net:
+    driver: bridge
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:

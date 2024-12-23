@@ -1,0 +1,106 @@
+services:
+  mev-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.enhanced
+    container_name: mev-bot-enhanced
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONOPTIMIZE=2
+      - PYTHONFAULTHANDLER=1
+      - PYTHONHASHSEED=random
+      - PYTHONASYNCIODEBUG=0
+      - LOG_LEVEL=DEBUG
+      - PROMETHEUS_MULTIPROC_DIR=/tmp
+      - UV_THREADPOOL_SIZE=32
+    ports:
+      - "8000:8000"  # API/monitoring
+      - "9090:9090"  # Prometheus metrics
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        reservations:
+          cpus: '2'
+          memory: 4G
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - mev-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./rules:/etc/prometheus/rules
+      - prometheus_data:/prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G
+    restart: unless-stopped
+    networks:
+      - mev-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - mev-network
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  mev-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16

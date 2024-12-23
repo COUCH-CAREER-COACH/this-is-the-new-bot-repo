@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'geth'
+    static_configs:
+      - targets: ['localhost:6060']
+    metrics_path: /debug/metrics/prometheus
+
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']
+
+  - job_name: 'mempool'
+    metrics_path: /debug/metrics/prometheus
+    static_configs:
+      - targets: ['localhost:6060']
+    relabel_configs:
+      - source_labels: [__name__]
+        regex: 'txpool_.*'
+        action: keep
+
+  - job_name: 'p2p'
+    metrics_path: /debug/metrics/prometheus
+    static_configs:
+      - targets: ['localhost:6060']
+    relabel_configs:
+      - source_labels: [__name__]
+        regex: 'p2p_.*'
+        action: keep

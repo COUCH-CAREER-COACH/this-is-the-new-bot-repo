@@ -1,17 +1,75 @@
-node_modules
+# Python virtual environment
+venv*/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.ganache-db/
+
+# Environment
 .env
+.env.*
+!.env.example
 
-# Hardhat files
-/cache
-/artifacts
+# Project specific
+data/
+logs/
+metrics/
+geth-data/
+artifacts/
+cache/
+grafana/plugins/
+grafana/grafana.db
+grafana/csv/
+grafana/pdf/
+grafana/png/
+optimization/plots/
+optimization/results/
+reports/analytics/
+reports/coverage/
+reports/errors/
+reports/performance/
+reports/test_results/
 
-# TypeChain files
-/typechain
-/typechain-types
-
-# solidity-coverage files
-/coverage
-/coverage.json
-
-# Hardhat Ignition default folder for deployments against a local node
-ignition/deployments/chain-31337
+# Deployment
+deployment-addresses.json
+gas-report.txt
+mainnet_readiness.log

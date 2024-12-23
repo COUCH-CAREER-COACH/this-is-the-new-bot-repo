@@ -1,0 +1,58 @@
+# Core Dependencies
+web3>=6.8.0
+eth-account>=0.12.3
+eth-typing>=3.4.0
+eth-utils>=2.2.0
+python-dotenv>=1.0.0
+
+# Async Support
+aiohttp>=3.8.5
+asyncio>=3.4.3
+websockets>=10.0.0
+
+# Monitoring & Metrics
+prometheus-client>=0.17.1
+prometheus-api-client>=0.5.0
+psutil>=5.9.0
+uvicorn[standard]>=0.22.0
+fastapi>=0.100.0
+redis>=4.5.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+pytest-xdist>=3.3.1
+pytest-timeout>=2.1.0
+
+# Data Analysis
+pandas>=2.0.3
+matplotlib>=3.7.2
+seaborn>=0.12.2
+numpy>=1.21.0
+
+# Development Tools
+black>=23.7.0
+flake8>=6.1.0
+mypy>=1.4.1
+isort>=5.12.0
+
+# Logging & Monitoring
+structlog>=23.1.0
+httpx>=0.24.0
+
+# Type Checking
+types-requests>=2.31.0.2
+types-setuptools>=68.0.0.3
+
+# Documentation
+sphinx>=6.2.1
+sphinx-rtd-theme>=1.2.2
+
+# Development Environment
+ipython>=8.14.0
+jupyter>=1.0.0
+
+# HTTP and API
+requests>=2.31.0
+tenacity>=8.0.0

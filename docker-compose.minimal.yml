@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  geth-node:
+    build:
+      context: .
+      dockerfile: Dockerfile.geth
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+    command: >
+      --dev
+      --dev.period=1
+      --http
+      --http.addr="0.0.0.0"
+      --http.port=8545
+      --http.api="eth,net,web3,debug,txpool"
+      --http.corsdomain="*"
+      --ws
+      --ws.addr="0.0.0.0"
+      --ws.port=8546
+      --ws.api="eth,net,web3,debug,txpool"
+      --networkid=1337
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8545"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  arbitrage-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.minimal
+    environment:
+      - WEB3_PROVIDER_URI=http://geth-node:8545
+      - WS_PROVIDER_URI=ws://geth-node:8546
+      - NETWORK=test
+      - CHAIN_ID=1337
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      geth-node:
+        condition: service_healthy

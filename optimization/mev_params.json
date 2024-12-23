@@ -1,0 +1,52 @@
+{
+    "gas": {
+        "optimal_gas_price": {
+            "aggressive": 150,
+            "competitive": 100,
+            "conservative": 50
+        },
+        "priority_fee": {
+            "high": 3,
+            "medium": 2,
+            "low": 1
+        },
+        "base_fee_multiplier": 1.2
+    },
+    "timing": {
+        "timing_strategy": {
+            "frontrun": {
+                "delay": 0.1
+            },
+            "sandwich": {
+                "delay": 0.2
+            }
+        }
+    },
+    "bundle": {
+        "optimal_size": {
+            "recommended": 3,
+            "max": 5
+        },
+        "gas_limits": {
+            "per_tx": 500000
+        }
+    },
+    "recommendations": {
+        "frontrun": {
+            "gas_price": 150,
+            "priority_fee": 3,
+            "timing_delay": 0.1
+        },
+        "sandwich": {
+            "gas_price": 100,
+            "priority_fee": 2,
+            "timing_delay": 0.2,
+            "bundle_size": 3
+        },
+        "general": {
+            "base_fee_multiplier": 1.2,
+            "max_bundle_size": 5,
+            "gas_limit_per_tx": 500000
+        }
+    }
+}

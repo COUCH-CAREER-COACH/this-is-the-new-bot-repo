@@ -1,0 +1,160 @@
+{
+    "network": {
+        "http_provider": "http://localhost:8545",
+        "ws_provider": "ws://localhost:8546",
+        "chain_id": 1,
+        "block_time": 12,
+        "max_blocks_to_wait": 2,
+        "gas_api": "http://localhost:8545",
+        "backup_providers": [
+            "http://localhost:8545"
+        ],
+        "ws_connection_limit": 3,
+        "http_request_timeout": 2,
+        "ws_reconnect_timeout": 1
+    },
+    "accounts": {
+        "mainnet": {
+            "address": "0x1111111111111111111111111111111111111111",
+            "private_key": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "test": {
+            "address": "0x1111111111111111111111111111111111111111",
+            "private_key": "1111111111111111111111111111111111111111111111111111111111111111"
+        }
+    },
+    "flashbots": {
+        "relay_url": "http://localhost:8545",
+        "max_attempts": 3,
+        "bundle_timeout": 0.5,
+        "priority_fee_per_gas": "3000000000",
+        "max_priority_fee_per_gas": "100000000000",
+        "simulation_block": "+2",
+        "simulation_timestamp": "+24"
+    },
+    "flash_loan": {
+        "preferred_provider": "mock",
+        "providers": {
+            "mock": {
+                "pool_address_provider": "0x2222222222222222222222222222222222222222",
+                "fee": "0.0009",
+                "max_attempts": 3,
+                "retry_delay": 0.1
+            }
+        }
+    },
+    "gas": {
+        "max_gas_price": 300000000000,
+        "priority_fee": 3000000000,
+        "max_priority_fee": 100000000000,
+        "base_fee_max_change": 0.125,
+        "gas_limits": {
+            "arbitrage": 300000,
+            "jit": 400000,
+            "sandwich": 500000
+        },
+        "estimation_buffer": 1.1,
+        "min_profit_after_gas": "100000000000000000"
+    },
+    "risk": {
+        "max_position_size": "50000000000000000000",
+        "min_profit_threshold": "100000000000000000",
+        "max_slippage": 0.02,
+        "min_liquidity": "2000000000000000000",
+        "circuit_breakers": {
+            "price_change": 0.05,
+            "gas_price": 500000000000,
+            "liquidity_drop": 0.3,
+            "consecutive_failures": 3,
+            "max_exposure_time": 2
+        },
+        "exposure_limits": {
+            "total_value": "1000000000000000000000",
+            "single_trade": "100000000000000000000",
+            "single_token": "500000000000000000000"
+        }
+    },
+    "dex": {
+        "uniswap_v2_router": "0x3333333333333333333333333333333333333333",
+        "uniswap_v2_factory": "0x4444444444444444444444444444444444444444",
+        "sushiswap_router": "0x5555555555555555555555555555555555555555",
+        "sushiswap_factory": "0x6666666666666666666666666666666666666666",
+        "test_tokens": {
+            "WETH": "0x7777777777777777777777777777777777777777",
+            "USDC": "0x8888888888888888888888888888888888888888",
+            "DAI": "0x9999999999999999999999999999999999999999"
+        },
+        "pool_cache_time": 30,
+        "price_cache_time": 1,
+        "min_pool_size_eth": "100000000000000000000"
+    },
+    "optimization": {
+        "position_sizing": {
+            "min_trade": "500000000000000000",
+            "max_trade": "50000000000000000000",
+            "increment": "500000000000000000",
+            "max_pool_impact": 0.005
+        },
+        "latency": {
+            "max_acceptable": 0.1,
+            "warning_threshold": 0.08,
+            "critical_threshold": 0.15,
+            "cache_duration": 1,
+            "max_retries": 3,
+            "retry_delay": 0.05,
+            "ws_ping_interval": 5,
+            "ws_timeout": 3,
+            "parallel_requests": 4
+        },
+        "competition": {
+            "max_competitors": 5,
+            "min_success_rate": 0.7,
+            "max_gas_premium": "30000000000",
+            "backoff_factor": 1.5,
+            "max_wait_blocks": 2
+        },
+        "mempool": {
+            "max_pending_tx": 5000,
+            "min_priority_fee": "2000000000",
+            "max_age_seconds": 60,
+            "cache_size": 10000,
+            "cleanup_interval": 100
+        }
+    },
+    "monitoring": {
+        "metrics_port": null,
+        "log_level": "INFO",
+        "alert_thresholds": {
+            "high_gas": 200000000000,
+            "high_latency": 0.15,
+            "low_success_rate": 0.8,
+            "low_profit": "50000000000000000"
+        },
+        "metrics_interval": 5,
+        "health_check_interval": 30,
+        "error_threshold": 3,
+        "recovery_time": 300
+    },
+    "test": {
+        "fork_block": 17000000,
+        "scenarios": {
+            "flash_crash": {
+                "price_changes": [-0.1, -0.2, -0.3],
+                "timeframes": [1, 1, 1]
+            },
+            "network_congestion": {
+                "base_fees": [200000000000, 500000000000, 1000000000000],
+                "block_usage": [0.8, 0.9, 0.95]
+            },
+            "mev_competition": {
+                "competitor_counts": [3, 5, 8],
+                "gas_premiums": [20000000000, 40000000000, 80000000000]
+            }
+        },
+        "simulation": {
+            "blocks_ahead": 2,
+            "max_simulations": 100,
+            "parallel_sims": 4
+        }
+    }
+}
